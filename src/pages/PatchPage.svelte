@@ -4,14 +4,28 @@
   import {repoCache} from '../lib/nostr.ts'
   import Header from '../components/Header.svelte'
   import UserLabel from '../components/UserLabel.svelte'
+  import type {Change} from 'parse-diff'
 
   export let patch: Patch
+  let viewRaw = false
 
   $: repoName = repoCache.get(patch.repo!.guid)?.name || patch.repo!.id
   $: repoOwner = patch.repo!.owner
   $: repoLink = '/' + patch.repo!.naddr
 
   console.log(patch)
+
+  function getLineNumber(line: Change): string {
+    return String(
+      line.type === 'normal'
+        ? line.ln1 || line.ln2
+        : line.type === 'del'
+        ? line.ln
+        : line.type === 'add'
+        ? line.ln
+        : ''
+    )
+  }
 </script>
 
 <header class="pb-3 bg-white">
@@ -58,8 +72,8 @@
       {/each}
     </section>
     <section class="ml-4">
-      {#each patch.files as file, i (i)}
-        <div id={`f${i}`} class="font-mono mb-4">
+      {#each patch.files as file, f (f)}
+        <div id={`f${f}`} class="font-mono mb-4">
           <div class="text-lg block py-1 px-2 border bg-zinc-50">
             {file.to}
           </div>
@@ -68,21 +82,15 @@
               <div>
                 {#each chunk.changes as line, i (i)}
                   <div
-                    id={`l${line.type[0]}${line.ln}`}
-                    class="grid px-2"
+                    id={`f${f}l${line.type[0]}${getLineNumber(line)}`}
+                    class="grid px-2 target:border-indigo-500 target:border-2"
                     class:bg-green-100={line.type === 'add'}
                     class:bg-red-100={line.type === 'del'}
                     style:grid-template-columns="3rem 3rem 2rem 1fr"
                   >
                     <a
                       class="justify-self-end"
-                      href={`#l${line.type[0]}${
-                        line.type === 'normal'
-                          ? line.ln1
-                          : line.type === 'del'
-                          ? line.ln
-                          : ''
-                      }`}
+                      href={`#f${f}l${line.type[0]}${getLineNumber(line)}`}
                     >
                       {line.type === 'normal'
                         ? line.ln1
@@ -92,13 +100,7 @@
                     </a>
                     <a
                       class="justify-self-end"
-                      href={`#l${line.type[0]}${
-                        line.type === 'normal'
-                          ? line.ln2
-                          : line.type === 'add'
-                          ? line.ln
-                          : ''
-                      }`}
+                      href={`#f${f}l${line.type[0]}${getLineNumber(line)}`}
                     >
                       {line.type === 'normal'
                         ? line.ln2
@@ -116,12 +118,32 @@
                 {/each}
               </div>
               {#if i !== file.chunks.length - 1}
-                <div class="bg-zinc-200 h-5">&nbsp;</div>
+                <div class="bg-zinc-100 mb-2 mt-1 h-5">&nbsp;</div>
               {/if}
             {/each}
           </div>
         </div>
       {/each}
     </section>
+  </div>
+  <div class="my-4">
+    <button
+      class="px-4 py-2 border"
+      on:click={() => {
+        viewRaw = !viewRaw
+      }}>view raw</button
+    >
+    <div class="mt-2 font-mono" class:hidden={!viewRaw}>
+      <div class="text-lg">patch</div>
+      <div class="border px-4 py-2 w-full">
+        <div class="whitespace-pre-wrap">{patch.event.content}</div>
+      </div>
+      <div class="text-lg mt-4">event</div>
+      <div class="border px-4 py-2 w-full">
+        <div class="whitespace-pre-wrap">
+          {JSON.stringify(patch.event, null, 2)}
+        </div>
+      </div>
+    </div>
   </div>
 </main>
