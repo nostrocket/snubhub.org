@@ -42,6 +42,6 @@
     </div>
   </div>
   <div class="text-zinc-700">
-    {patch.patch.message}
+    {patch.preamble.match(/Subject: (.*)/)?.[1] || '<empty>'}
   </div>
 </div>

@@ -98,6 +98,11 @@
             },
             oneose() {
               loading = false
+              if (patch) {
+                patch.sourceRelays = Array.from(
+                  pool.seenOn.get(patch.event.id)?.values?.() || []
+                ).map(r => r.url)
+              }
             }
           }
         )
@@ -108,12 +113,14 @@
   })
 </script>
 
-{#if patch}
-  <PatchPage {patch} />
-{:else if repo}
-  <RepositoryPage {repo} />
-{:else if loading}
-  <div class="p-8">loading</div>
-{:else}
-  <div class="p-8">not found</div>
-{/if}
+<div class="mx-auto">
+  {#if patch}
+    <PatchPage {patch} />
+  {:else if repo}
+    <RepositoryPage {repo} />
+  {:else if loading}
+    <div class="p-8">loading</div>
+  {:else}
+    <div class="p-8">not found</div>
+  {/if}
+</div>

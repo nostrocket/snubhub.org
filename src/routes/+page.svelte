@@ -58,8 +58,14 @@
         },
         oneose() {
           eoseHappened = true
-          patches = patches
           repos = repos
+
+          patches = patches.map(patch => {
+            patch.sourceRelays = Array.from(
+              pool.seenOn.get(patch.event.id)?.values?.() || []
+            ).map(r => r.url)
+            return patch
+          })
         }
       }
     )
@@ -69,7 +75,7 @@
 <h1 class="text-2xl">
   <Header />
 </h1>
-<div class="m-8 max-w-6xl grid grid-flow-col auto-cols-auto gap-8">
+<div class="m-8 max-w-8xl grid grid-flow-col auto-cols-auto gap-8">
   <div class="bg-orange-100 py-2 px-4 rounded">
     <h2 class="text-2xl px-4 py-2 text-center">latest repositories</h2>
     {#each repos as repo (repo.guid)}

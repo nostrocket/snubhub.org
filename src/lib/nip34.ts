@@ -1,7 +1,7 @@
 import {naddrEncode, neventEncode} from 'nostr-tools/nip19'
 import type {Event, NostrEvent} from 'nostr-tools/wasm'
-import type {ParsedPatchType} from 'parse-git-patch'
-import parseGitPatch from 'parse-git-patch'
+import type {File} from 'parse-diff'
+import parseDiff from 'parse-diff'
 
 export type Repo = {
   guid: string
@@ -71,7 +71,9 @@ export function parseRepo(evt: Event, sourceRelays: string[] = []): Repo {
 
 export type Patch = {
   event: NostrEvent
-  patch: ParsedPatchType
+  preamble: string
+  comment: string
+  files: File[]
   nevent: string
   sourceRelays: string[]
   repo:
@@ -87,15 +89,22 @@ export type Patch = {
 
 export function parsePatch(
   evt: NostrEvent,
-  sourceRelays: string[]
+  sourceRelays: string[] = []
 ): Patch | null {
-  const res = parseGitPatch(evt.content)
-  if (!res) return null
-  if (!res.date) return null
+  const [preamble, rest] = evt.content.split('\n---\n')
+  const diffStart = rest.match(/\n \w/)?.index
+  if (!diffStart) return null
+  const comment = rest.substring(0, diffStart)
+  const diff = rest.substring(diffStart + 1)
+
+  const files = parseDiff(diff)
+  if (files.length === 0) return null
 
   return {
     event: evt,
-    patch: res,
+    preamble,
+    comment,
+    files,
     sourceRelays: [],
     get repo() {
       try {

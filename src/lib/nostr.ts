@@ -22,6 +22,7 @@ export type Metadata = {
 initNostrWasm().then(setNostrWasm)
 
 export const pool = new AbstractSimplePool({verifyEvent})
+pool.trackRelays = true
 
 const _metadataCache = new Map<string, Promise<Metadata>>()
 const _relaysCache = new Map<

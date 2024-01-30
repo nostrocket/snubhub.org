@@ -28,7 +28,7 @@
         class="h-full w-full px-2 py-1 text-sm text-white rounded transition-colors bg-rose-500 hover:bg-rose-700"
         on:click={() => signer.getPublicKey()}
       >
-        login with public key
+        login with extension
       </button>
     {/if}
   </div>

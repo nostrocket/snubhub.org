@@ -50,8 +50,13 @@
           }
         },
         oneose() {
-          patches = patches
           eoseHappened = true
+          patches = patches.map(patch => {
+            patch.sourceRelays = Array.from(
+              pool.seenOn.get(patch.event.id)?.values?.() || []
+            ).map(r => r.url)
+            return patch
+          })
         },
         onclose(reason) {
           console.warn('subscription closed', reason)
@@ -64,7 +69,7 @@
 <header class="pb-3 bg-white">
   <Header />
 </header>
-<main class="p-8 max-w-6xl">
+<main class="p-8 max-w-8xl">
   <div class="flex justify-between bg-emerald-300 py-2 px-8 rounded">
     <div>{repo.id}</div>
     <UserLabel withLink pubkey={repo.event.pubkey} />
@@ -73,36 +78,41 @@
     <section class="bg-sky-200 mt-2 py-2 px-4 rounded">
       <h2 class="text-2xl px-4 py-2 text-center">info</h2>
       {#if repo.description}<div>{repo.description}</div>{/if}
-      {#if repo.head}<div>{repo.head}</div>{/if}
-      <div class="flex">
+      {#if repo.head}<div>
+          head: <span class="font-mono">{repo.head}</span>
+        </div>{/if}
+      <div class="mt-2">clone</div>
+      <div class="ml-2 flex flex-col">
         {#each repo.clone as url}
           <div class="mr-2">
             {url}
           </div>
         {/each}
       </div>
-      <div class="flex">
+      <div class="mt-2">browse</div>
+      <div class="ml-2 flex flex-col">
         {#each repo.web as url}
           <div class="mr-2">
-            {url}
+            <a class="cursor-pointer hover:underline" href={url}>{url}</a>
           </div>
         {/each}
       </div>
-      <div class="flex">
+      <div class="mt-2">relays</div>
+      <div class="ml-2 flex flex-col">
         {#each repo.patches as url}
           <div class="mr-2">
             {url}
           </div>
         {/each}
       </div>
-      <div class="flex">
+      <div class="ml-2 flex flex-col">
         {#each repo.issues as url}
           <div class="mr-2">
             {url}
           </div>
         {/each}
       </div>
-      <div class="flex">
+      <div class="ml-2 flex flex-wrap">
         {#each repo.event.tags.filter(t => t[0] === 't') as tag}
           <div class="mr-2">
             #{tag[1]}

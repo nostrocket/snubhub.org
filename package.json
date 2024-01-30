@@ -46,7 +46,7 @@
     "debounce": "^1.2.1",
     "isomorphic-git": "^1.25.3",
     "nostr-tools": "2.1.5",
-    "parse-git-patch": "^1.2.2",
+    "parse-diff": "^0.11.1",
     "s-ago": "^2.2.0"
   }
 }
