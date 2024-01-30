@@ -36,7 +36,7 @@ export function parseRepo(evt: Event, sourceRelays: string[] = []): Repo {
         identifier: this.id,
         kind: 30617,
         pubkey: this.event.pubkey,
-        relays: sourceRelays
+        relays: this.sourceRelays
       })
     }
   }
@@ -105,7 +105,7 @@ export function parsePatch(
     preamble,
     comment,
     files,
-    sourceRelays: [],
+    sourceRelays,
     get repo() {
       try {
         const a = evt.tags.find(tag => tag[0] === 'a')![1]
@@ -122,8 +122,8 @@ export function parsePatch(
           },
           get naddr() {
             return naddrEncode({
-              identifier: id,
-              pubkey: owner,
+              identifier: this.id,
+              pubkey: this.owner,
               kind: 30617,
               relays
             })
@@ -135,10 +135,10 @@ export function parsePatch(
     },
     get nevent() {
       return neventEncode({
-        id: evt.id,
-        relays: sourceRelays,
-        author: evt.pubkey,
-        kind: evt.kind
+        id: this.event.id,
+        relays: this.sourceRelays,
+        author: this.event.pubkey,
+        kind: this.event.kind
       })
     }
   } as Patch
